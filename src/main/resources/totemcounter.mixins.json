@@ -6,10 +6,8 @@
   "client": [
     "MixinChatHud",
     "MixinClientPlayNetworkHandler",
-    "MixinEntityRenderer",
     "MixinGameRenderer",
     "MixinInGameHud",
-    "MixinMinecraftClient",
     "MixinPlayerListHud"
   ],
   "mixins": [

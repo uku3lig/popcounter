@@ -7,6 +7,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.text.MutableText;
@@ -24,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 @Mixin(InGameHud.class)
@@ -76,7 +78,7 @@ public class MixinInGameHud {
 
         context.getMatrices().push();
         if (TotemCounterConfig.get().isUseDefaultTotem()) {
-            context.drawTexture(TotemCounter.ICONS, x, y, 0, 0, 16, 16);
+            context.drawTexture(RenderLayer::getGuiTextured, TotemCounter.DEFAULT_TOTEM, x, y, 0, 0, 16, 16, 16, 16);
         } else {
             context.drawItem(TotemCounter.TOTEM, x, y);
         }
@@ -91,15 +93,13 @@ public class MixinInGameHud {
         return shouldRenderBar() ? 1 : original;
     }
 
-    @WrapOperation(method = "renderExperienceBar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Lnet/minecraft/util/Identifier;IIIIIIII)V"))
-    public void hideExperienceBar(DrawContext context, Identifier texture, int i, int j, int k, int l, int x, int y, int width, int height, Operation<Void> original) {
+    @WrapOperation(method = "renderExperienceBar", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIIIIIII)V"))
+    public void hideExperienceBar(DrawContext context, Function<Identifier, RenderLayer> renderLayers, Identifier sprite, int textureWidth, int textureHeight, int u, int v, int x, int y, int width, int height, Operation<Void> original) {
         if (shouldRenderBar()) {
             int argb = getColor(getCount(client.player));
-            context.setShaderColor(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, 1);
-            context.drawTexture(TotemCounter.ICONS, x, context.getScaledWindowHeight() - 32 + 3, 0, 16, 182, 5);
-            context.setShaderColor(1, 1, 1, 1);
+            context.drawTexture(renderLayers, TotemCounter.WHITE_BAR, x, y, 0, 0, 182, 5, 182, 5, argb);
         } else {
-            original.call(context, texture, i, j, k, l, x, y, width, height);
+            original.call(context, renderLayers, sprite, textureWidth, textureHeight, u, v, x, y, width, height);
         }
     }
 }

@@ -6,11 +6,7 @@ import lombok.Getter;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -23,6 +19,7 @@ import net.minecraft.util.Identifier;
 import net.uku3lig.totemcounter.config.TotemCounterConfig;
 import net.uku3lig.ukulib.config.ConfigManager;
 import net.uku3lig.ukulib.utils.PlayerArgumentType;
+import net.uku3lig.ukulib.utils.Ukutils;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -33,15 +30,19 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 import static net.minecraft.util.Formatting.*;
 
 public class TotemCounter implements ModInitializer {
+    private static final String MOD_ID = "totemcounter";
+
     @Getter
     private static final Map<UUID, Integer> pops = new HashMap<>();
     @Getter
+    private static final ConfigManager<TotemCounterConfig> manager = ConfigManager.createDefault(TotemCounterConfig.class, MOD_ID);
+
     private static final KeyBinding resetCounter = new KeyBinding("totemcounter.reset", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "Totemcounter");
-    @Getter
-    private static final ConfigManager<TotemCounterConfig> manager = ConfigManager.createDefault(TotemCounterConfig.class, "totemcounter");
 
     public static final ItemStack TOTEM = new ItemStack(Items.TOTEM_OF_UNDYING);
-    public static final Identifier ICONS = Identifier.of("totemcounter", "gui/icons.png");
+    public static final Identifier DEFAULT_TOTEM = Identifier.of(MOD_ID, "gui/totem.png");
+    public static final Identifier WHITE_BAR = Identifier.of(MOD_ID, "gui/bar.png");
+
     private static final Text PREFIX = Text.empty()
             .append(Text.literal("Totem").formatted(YELLOW, BOLD))
             .append(Text.literal("Counter").formatted(GREEN, BOLD))
@@ -57,7 +58,8 @@ public class TotemCounter implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        KeyBindingHelper.registerKeyBinding(resetCounter);
+        Ukutils.registerKeybinding(resetCounter, client -> resetPopCounter());
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(literal("resetcounter").executes(this::resetCounterCommand).then(
                     argument(PLAYER_ARG, PlayerArgumentType.player()).executes(this::resetPlayerCounterCommand)
@@ -158,7 +160,6 @@ public class TotemCounter implements ModInitializer {
 
     public static void resetPopCounter() {
         pops.clear();
-        ToastManager toastManager = MinecraftClient.getInstance().getToastManager();
-        SystemToast.show(toastManager, SystemToast.Type.NARRATOR_TOGGLE, Text.of("Successfully reset pop counter"), Text.of("You can now start counting again!"));
+        Ukutils.sendToast(Text.of("Successfully reset pop counter"), Text.of("You can now start counting again!"));
     }
 }

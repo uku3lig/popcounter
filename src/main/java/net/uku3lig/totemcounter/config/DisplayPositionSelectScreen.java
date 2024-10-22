@@ -2,6 +2,7 @@ package net.uku3lig.totemcounter.config;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.text.Text;
 import net.uku3lig.totemcounter.TotemCounter;
 import net.uku3lig.ukulib.config.screen.PositionSelectScreen;
@@ -28,7 +29,7 @@ public class DisplayPositionSelectScreen extends PositionSelectScreen {
     protected void draw(DrawContext drawContext, int mouseX, int mouseY, float delta, int x, int y) {
         drawContext.getMatrices().push();
         if (TotemCounter.getManager().getConfig().isUseDefaultTotem()) {
-            drawContext.drawTexture(TotemCounter.ICONS, x, y, 0, 0, 16, 16);
+            drawContext.drawTexture(RenderLayer::getGuiTextured, TotemCounter.DEFAULT_TOTEM, x, y, 0, 0, 16, 16, 16, 16);
         } else {
             drawContext.drawItem(TotemCounter.TOTEM, x, y);
         }
