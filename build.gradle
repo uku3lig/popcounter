@@ -1,7 +1,7 @@
 plugins {
-    id 'fabric-loom' version '1.7-SNAPSHOT'
-    id "io.freefair.lombok" version "8.7.1"
-    id 'org.ajoberstar.grgit' version '5.0.0'
+    id "fabric-loom" version "1.8.10"
+    id "io.freefair.lombok" version "8.10.2"
+    id "org.ajoberstar.grgit" version "5.0.0"
 }
 
 version = "${project.mod_version}+mc${project.minecraft_version}${grgit.status().clean ? "" : "-dirty"}"
